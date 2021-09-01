@@ -1,2 +1,2 @@
-# actions-secret-manager
-A Github Action for Creation / Deletion / Updating of Github Secrets
+# Actions Secret Manager
+A Github Action workflow for Creation / Deletion / Updating of Github Secrets
