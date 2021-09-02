@@ -14,8 +14,8 @@ github_base_url = "https://api.github.com"
 
 class GithubSecret:
     name: str
-    value: str
-
+    value = None
+    file = None
 
 class RequestData:
     action: str
@@ -54,7 +54,7 @@ def encrypt_secret_value(public_key: str, secret_value: str) -> str:
 
 
 def get_user_details(request: RequestData):
-    """Get the Github user"""
+    """Fetch the current Github user"""
     query_url = f"{github_base_url}/user"
     headers={'Authorization': f'token {request.token}'}
     res = requests.get(query_url, headers=headers)
@@ -66,7 +66,7 @@ def get_user_details(request: RequestData):
 
 
 def get_secret_encryption_public_key(request: RequestData):
-    """Get pulic key from Github for secret encryption"""
+    """Fetch pulic key from Github for secret encryption."""
     query_url = f"{github_base_url}/repos/{request.github_username}/{request.repository}/actions/secrets/public-key"
     headers={'Authorization': f'token {request.token}'}
     res = requests.get(query_url, headers=headers)
@@ -76,7 +76,8 @@ def get_secret_encryption_public_key(request: RequestData):
         return namespaced_res
 
 
-def get_secret_names(request: RequestData):
+def get_secret_names(request: RequestData) -> list:
+    """Fetch secret names from Github. Return them as a list."""
     query_url = f"{github_base_url}/repos/{request.github_username}/{request.repository}/actions/secrets"
     headers={'Authorization': f'token {request.token}'}
     res = requests.get(query_url, headers=headers)
@@ -88,14 +89,29 @@ def get_secret_names(request: RequestData):
         return list(map(lambda secret : secret["name"], namespaced_res.secrets))
 
 
+def read_file_contents(request: RequestData):
+    try:
+        if request.secret.file != None:
+            f = open(request.secret.file, encoding = 'utf-8')
+            # perform file operations
+            return f.read()
+    except FileNotFoundError:
+        sys.exit(1)
+
+
 def create_secret(request: RequestData):
-    existing_secret_names = get_secret_names(request)
-    if request.secret.name in existing_secret_names:
-        print(f'<{request.secret.name}> already exists, try action: update|create_or_update')
-        exit
+    """PUT request to create a repository level secret in Github Actions."""
+    if request.action not in ('update', 'create_or_update'):
+        existing_secret_names = get_secret_names(request)
+        if request.secret.name in existing_secret_names:
+            print(f'<{request.secret.name}> already exists, try action: update|create_or_update')
+            sys.exit(1)
 
     repository_public_key = get_secret_encryption_public_key(request)
-    encrypted_secret = encrypt_secret_value(repository_public_key.key, request.secret.value)
+    if request.secret.value == None:
+        encrypted_secret = encrypt_secret_value(repository_public_key.key, read_file_contents(request))
+    else:
+        encrypted_secret = encrypt_secret_value(repository_public_key.key, request.secret.value)
     
     query_url = f"{github_base_url}/repos/{request.github_username}/{request.repository}/actions/secrets/{request.secret.name}"
     headers = {
@@ -126,6 +142,7 @@ def delete_secret():
 
 
 def parse_args() -> RequestData:
+    """Parse the commannd line input into the request data."""
     try:
         opts, args = getopt.getopt(sys.argv[1:],"a:t:h",
             [
@@ -134,7 +151,8 @@ def parse_args() -> RequestData:
                 'help', 
                 'secret-name=',
                 'secret-value=',
-                'repository='
+                'repository=',
+                'secret-file='
             ])
 
         request = RequestData()
@@ -152,6 +170,8 @@ def parse_args() -> RequestData:
                 request.secret.name = arg
             elif opt in ('--secret-value'):
                 request.secret.value = arg
+            elif opt in ('--secret-file'):
+                request.secret.file = arg
             elif opt in ('--repository'):
                 request.repository = arg
 
@@ -162,16 +182,11 @@ def parse_args() -> RequestData:
       sys.exit(2)
 
 
-def get_name(secret):
-    return secret["name"]
-
 def main():
     request = parse_args()
 
     get_user_details(request)
-    response = make_request_for_action(request)
-    get_secret_encryption_public_key(request)
-    # existing_secret_names = list(map(lambda secret : secret["name"], response["secrets"]))
+    make_request_for_action(request)
 
     print("Secret to set: <" + request.secret.name + ">")
 
