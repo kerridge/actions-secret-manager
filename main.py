@@ -28,12 +28,16 @@ class RequestData:
         return self.secret.name
 
 
+# Testable
 def help(flag=''):
     if flag == 'action':
         print("-a|--action create|update|delete")
-    print("test.py -i <inputfile> -o <outputfile>")
+
+    else:
+        print("test.py -i <inputfile> -o <outputfile>")
 
 
+# Testable
 def make_request_for_action(request: RequestData):
     if request.action == "create":
         return create_secret(request)
@@ -89,6 +93,7 @@ def get_secret_names(request: RequestData) -> list:
         return list(map(lambda secret : secret["name"], namespaced_res.secrets))
 
 
+# Testable
 def read_file_contents(request: RequestData):
     try:
         if request.secret.file != None:
@@ -96,11 +101,20 @@ def read_file_contents(request: RequestData):
             # perform file operations
             return f.read()
     except FileNotFoundError:
+        print(f"File not found at specified path: {request.secret.file}")
         sys.exit(1)
 
 
+# TODO: Move check logic out to make testable
 def create_secret(request: RequestData):
     """PUT request to create a repository level secret in Github Actions."""
+    if request.secret.value == None and request.secret.file == None:
+        print("No secret value or filename provided")
+        sys.exit(1)
+    elif request.secret.value != None and request.secret.file != None:
+        print("Either provide a secret value OR a filename, not both")
+        sys.exit(1)
+        
     if request.action not in ('update', 'create_or_update'):
         existing_secret_names = get_secret_names(request)
         if request.secret.name in existing_secret_names:
@@ -108,9 +122,11 @@ def create_secret(request: RequestData):
             sys.exit(1)
 
     repository_public_key = get_secret_encryption_public_key(request)
-    if request.secret.value == None:
+    if request.secret.value == None and request.secret.file != None:
+        # Read secret value from file
         encrypted_secret = encrypt_secret_value(repository_public_key.key, read_file_contents(request))
-    else:
+    elif request.secret.file == None and request.secret.value != None:
+        # Read secret value from command line
         encrypted_secret = encrypt_secret_value(repository_public_key.key, request.secret.value)
     
     query_url = f"{github_base_url}/repos/{request.github_username}/{request.repository}/actions/secrets/{request.secret.name}"
@@ -126,6 +142,7 @@ def create_secret(request: RequestData):
     res = requests.put(query_url, headers=headers, data=json.dumps(data))
     
     if res.ok:
+        print(f"<{request.secret.name}> set successfully!")
         # Converts json to dot notation for easier access on fields
         namespaced_res = SimpleNamespace(**res.json())
         return namespaced_res
@@ -141,6 +158,7 @@ def delete_secret():
     pass
 
 
+# Testable
 def parse_args() -> RequestData:
     """Parse the commannd line input into the request data."""
     try:
@@ -157,6 +175,7 @@ def parse_args() -> RequestData:
 
         request = RequestData()
 
+        # TODO: None checking for mandatory values, maybe a cumulative error printout
         for opt, arg in opts:
             if opt in ('-h', '--help'):
                 help()
@@ -176,6 +195,7 @@ def parse_args() -> RequestData:
                 request.repository = arg
 
         return request
+        # Validate data method
 
     except getopt.GetoptError:
       help()
@@ -187,8 +207,6 @@ def main():
 
     get_user_details(request)
     make_request_for_action(request)
-
-    print("Secret to set: <" + request.secret.name + ">")
 
 
 if __name__ == "__main__":
