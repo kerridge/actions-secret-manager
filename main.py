@@ -96,7 +96,7 @@ def get_secret_names(request: RequestData) -> list:
 # Testable
 def read_file_contents(request: RequestData):
     try:
-        if request.secret.file != None:
+        if request.secret.file != None or request.secret.file != "":
             f = open(request.secret.file, encoding = 'utf-8')
             # perform file operations
             return f.read()
