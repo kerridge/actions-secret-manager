@@ -197,9 +197,10 @@ def parse_args() -> RequestData:
         return request
         # Validate data method
 
-    except getopt.GetoptError:
-      help()
-      sys.exit(2)
+    except getopt.GetoptError as err:
+        print(err)
+        help()
+        sys.exit(2)
 
 
 def main():

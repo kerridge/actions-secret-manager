@@ -7,7 +7,7 @@ python /app/main.py \
     --action "${ACTION}" \
     --token "${TOKEN}" \
     --repository "${REPOSITORY}" \
-    --file "${FILE}"
+    --secret-file "${FILE}"
 
 # python ./main.py \
 #     --secret-name "GH_SSH_PRIVATE_KEY" \
