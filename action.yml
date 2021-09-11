@@ -16,7 +16,7 @@ inputs:
     mandatory: False
     default: ''
   file:
-    description: 'A path to a file containing only a secret value. File contents won't be shown in githubs logs so I recommmend this option'
+    description: "A path to a file containing only a secret value. File contents won't be shown in githubs logs so I recommmend this option"
     mandatory: False
     default: ''
 runs:
