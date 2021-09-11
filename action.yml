@@ -8,26 +8,26 @@ inputs:
   token: 
     description: 'A GitHub Personal Access Token with manage secrets permission. Can NOT be the GITHUB_TOKEN secret.'
     mandatory: True
-  secret-name:
+  name:
     description: 'The secret name to apply the action to'
     mandatory: True
-  secret-value:
+  value:
     description: 'A quote encapsulated secret value. Only required if `create` or `update` is selected'
     mandatory: False
     default: ''
-  secret-file:
-    description: 'A path to a file containing only a secret value. File contents won't be shown on githubs logs so I recommmend this option'
+  file:
+    description: 'A path to a file containing only a secret value. File contents won't be shown in githubs logs so I recommmend this option'
     mandatory: False
     default: ''
 runs:
-  using: docker
-  image: Dockerfile
+  using: 'docker'
+  image: 'Dockerfile'
   env:
     ACTION: ${{ inputs.action }}
     TOKEN: ${{ inputs.token }}
-    NAME: ${{ inputs.secret-name }}
-    VALUE: ${{ inputs.secret-value }}
-    FILE: ${{ inputs.secret-file }}
+    NAME: ${{ inputs.name }}
+    VALUE: ${{ inputs.value }}
+    FILE: ${{ inputs.file }}
     REPOSITORY: ${{ github.event.repository.name }}
 branding:
   icon: 'lock'  
