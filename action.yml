@@ -1,4 +1,4 @@
-name: Actions Respository Secret Manager
+name: 'Github Actions Respository Secret Manager'
 author: 'kerridge'
 description: 'A tool to create|update|delete encrypted repository secrets in github actions.'
 inputs:
