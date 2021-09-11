@@ -18,8 +18,9 @@ class ValidActions:
     UPDATE: Final = 'update'
     DELETE: Final = 'delete'
 
-    def AVAILABLE_ACTIONS(self):
-        return (self.CREATE, self.UPDATE, self.DELETE)
+    ALL_ACTIONS: Final = (CREATE, UPDATE, DELETE)
+    CREATE_ACTIONS: Final = (CREATE, UPDATE)
+
 
 class GithubSecret:
     name: str
@@ -117,13 +118,6 @@ def read_file_contents(request: RequestData):
 # TODO: Move check logic out to make testable
 def create_secret(request: RequestData):
     """PUT request to create a repository level secret in Github Actions."""
-    if request.secret.value == '' and request.secret.file == '':
-        print("No secret value or filename provided")
-        sys.exit(1)
-    elif request.secret.value != '' and request.secret.file != '':
-        print("Either provide a secret value OR a filename, not both")
-        sys.exit(1)
-        
     if request.action not in ('update', 'create_or_update'):
         existing_secret_names = get_secret_names(request)
         if request.secret.name in existing_secret_names:
@@ -170,11 +164,11 @@ def delete_secret():
 def validate_request(request: RequestData):
     errors = list()
 
-    if request.action not in ValidActions.AVAILABLE_ACTIONS():
+    if request.action not in ValidActions.ALL_ACTIONS:
         help('action')
-        errors.append("Not in available actions")
+        errors.append(f"`{request.action}` is not in available actions {ValidActions.ALL_ACTIONS}")
 
-    if request.action in ("create", "update"):
+    if request.action in ValidActions.CREATE_ACTIONS:
         # No value or file provided
         if request.secret.file == None and request.secret.value == None:
             errors.append("Provide either a file or a value")
@@ -182,7 +176,7 @@ def validate_request(request: RequestData):
         elif request.secret.file != None and request.secret.value != None:
             errors.append("Provide either a file or a value, not both")
 
-    if errors.count > 0:
+    if errors.__len__() > 0:
         for error in errors:
             print(error)
         sys.exit(1)
@@ -207,6 +201,9 @@ def parse_args() -> RequestData:
 
         # TODO: None checking for mandatory values, maybe a cumulative error printout
         for opt, arg in opts:
+            if arg == '':
+                arg = None
+
             if opt in ('-h', '--help'):
                 help()
                 sys.exit()
