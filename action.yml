@@ -20,7 +20,7 @@ inputs:
     mandatory: False
     default: ''
   repository:
-    description: 'The repository to add the secret to. Can be passed with ${{ github.event.repository.name }}'
+    description: 'The repository to add the secret to. Can be passed with contet variable `github.event.repository.name`'
     mandatory: True
 runs:
   using: 'docker'
