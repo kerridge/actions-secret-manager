@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Environment variables are set from input passed to Github Actions
-python ./main.py \
+python /app/main.py \
     --secret-name "${NAME}" \
     --secret-value "${VALUE}" \
     --action "${ACTION}" \
