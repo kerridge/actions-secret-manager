@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo $REPOSITORY
+echo $GITHUB_ACTION_REPOSITORY
+echo $GITHUB_REF
+
 # Environment variables are set from input passed to Github Actions
 python /app/main.py \
     --secret-name "${NAME}" \
