@@ -26,7 +26,7 @@ runs:
     ACTION: ${{ inputs.action }}
     TOKEN: ${{ inputs.token }}
     NAME: ${{ inputs.name }}
-    VALUE: ${{ inputs.value }}
+    VALUE: "${{ inputs.value }}"
     FILE: ${{ inputs.file }}
 branding:
   icon: 'lock'  
