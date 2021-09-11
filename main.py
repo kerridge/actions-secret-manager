@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import json
 from base64 import b64encode
 from nacl import encoding, public
+from typing import Final
 
 # ACTION: Create/Update/Delete [STRING]
 # TOKEN: GITHUB ACCESS TOKEN [STRING]
@@ -11,6 +12,14 @@ from nacl import encoding, public
 # SECRET VALUE: [STRING, INT?]
 
 github_base_url = "https://api.github.com"
+
+class ValidActions:
+    CREATE: Final = 'create'
+    UPDATE: Final = 'update'
+    DELETE: Final = 'delete'
+
+    def AVAILABLE_ACTIONS(self):
+        return (self.CREATE, self.UPDATE, self.DELETE)
 
 class GithubSecret:
     name: str
@@ -27,7 +36,6 @@ class RequestData:
     def __str__(self):
         return self.secret.name
 
-
 # Testable
 def help(flag=''):
     if flag == 'action':
@@ -39,11 +47,11 @@ def help(flag=''):
 
 # Testable
 def make_request_for_action(request: RequestData):
-    if request.action == "create":
+    if request.action == ValidActions.CREATE:
         return create_secret(request)
-    elif request.action == "update":
+    elif request.action == ValidActions.UPDATE:
         update_secret()
-    elif request.action == "delete":
+    elif request.action == ValidActions.DELETE:
         delete_secret()
     else:
         help('action')
@@ -159,6 +167,27 @@ def delete_secret():
     pass
 
 
+def validate_request(request: RequestData):
+    errors = list()
+
+    if request.action not in ValidActions.AVAILABLE_ACTIONS():
+        help('action')
+        errors.append("Not in available actions")
+
+    if request.action in ("create", "update"):
+        # No value or file provided
+        if request.secret.file == None and request.secret.value == None:
+            errors.append("Provide either a file or a value")
+        # Value AND file provided
+        elif request.secret.file != None and request.secret.value != None:
+            errors.append("Provide either a file or a value, not both")
+
+    if errors.count > 0:
+        for error in errors:
+            print(error)
+        sys.exit(1)
+
+
 # Testable
 def parse_args() -> RequestData:
     """Parse the commannd line input into the request data."""
@@ -196,8 +225,8 @@ def parse_args() -> RequestData:
                 # Automatically added to env by github. Follows {user}/{reposiitory}
                 request.repository = arg.split('/')[1]
 
+        validate_request(request)
         return request
-        # Validate data method
 
     except getopt.GetoptError as err:
         print(err)
@@ -209,6 +238,7 @@ def main():
     request = parse_args()
 
     get_user_details(request)
+    # TODO: Get existing secrets?
     make_request_for_action(request)
 
 
