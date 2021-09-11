@@ -193,6 +193,7 @@ def parse_args() -> RequestData:
             elif opt in ('--secret-file'):
                 request.secret.file = arg
             elif opt in ('--repository'):
+                # Automatically added to env by github. Follows {user}/{reposiitory}
                 request.repository = arg.split('/')[1]
 
         return request
