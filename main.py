@@ -108,10 +108,10 @@ def read_file_contents(request: RequestData):
 # TODO: Move check logic out to make testable
 def create_secret(request: RequestData):
     """PUT request to create a repository level secret in Github Actions."""
-    if request.secret.value == None and request.secret.file == None:
+    if request.secret.value == '' and request.secret.file == '':
         print("No secret value or filename provided")
         sys.exit(1)
-    elif request.secret.value != None and request.secret.file != None:
+    elif request.secret.value != '' and request.secret.file != '':
         print("Either provide a secret value OR a filename, not both")
         sys.exit(1)
         
@@ -122,10 +122,10 @@ def create_secret(request: RequestData):
             sys.exit(1)
 
     repository_public_key = get_secret_encryption_public_key(request)
-    if request.secret.value == None and request.secret.file != None:
+    if request.secret.value == '' and request.secret.file != '':
         # Read secret value from file
         encrypted_secret = encrypt_secret_value(repository_public_key.key, read_file_contents(request))
-    elif request.secret.file == None and request.secret.value != None:
+    elif request.secret.file == '' and request.secret.value != '':
         # Read secret value from command line
         encrypted_secret = encrypt_secret_value(repository_public_key.key, request.secret.value)
     
