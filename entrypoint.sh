@@ -1,17 +1,12 @@
 #!/bin/bash
 
-echo $GITHUB_REPOSITORY
-echo $GITHUB_BASE_REF
-echo $GITHUB_WORKSPACE
-echo $GITHUB_ACTION_REF
-
 # Environment variables are set from input passed to Github Actions
 python /app/main.py \
     --secret-name "${NAME}" \
     --secret-value "${VALUE}" \
     --action "${ACTION}" \
     --token "${TOKEN}" \
-    --repository "${REPOSITORY}" \
+    --repository "${GITHUB_REPOSITORY}" \ # Automatically added to env by github. Follows {user}/{reposiitory}
     --secret-file "${FILE}"
 
 # python ./main.py \

@@ -19,9 +19,6 @@ inputs:
     description: "A path to a file containing only a secret value. File contents won't be shown in githubs logs so I recommmend this option"
     mandatory: False
     default: ''
-  repository:
-    description: 'The repository to add the secret to. Can be passed with contet variable `github.event.repository.name`'
-    mandatory: True
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -31,7 +28,6 @@ runs:
     NAME: ${{ inputs.name }}
     VALUE: ${{ inputs.value }}
     FILE: ${{ inputs.file }}
-    REPOSITORY: ${{ inputs.repository }}
 branding:
   icon: 'lock'  
   color: 'blue'

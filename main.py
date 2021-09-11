@@ -193,7 +193,7 @@ def parse_args() -> RequestData:
             elif opt in ('--secret-file'):
                 request.secret.file = arg
             elif opt in ('--repository'):
-                request.repository = arg
+                request.repository = arg.split('/')[1]
 
         return request
         # Validate data method
