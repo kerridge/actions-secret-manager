@@ -13,4 +13,5 @@ COPY main.py .
 FROM base as prod
 
 COPY entrypoint.sh .
-ENTRYPOINT ["./entrypoint.sh"]
+
+ENTRYPOINT ["/app/entrypoint.sh"]
