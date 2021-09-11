@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "YO: ${VAULE}"
+echo "YO: ${INPUT_VALUE}"
 
 # Environment variables are set from input passed to Github Actions
 python /app/main.py \
