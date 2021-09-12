@@ -5,7 +5,7 @@ echo "YO: ${INPUT_VALUE}"
 # Environment variables are set from input passed to Github Actions
 python /app/main.py \
     --secret-name "${NAME}" \
-    --secret-value "${VALUE}" \
+    --secret-value "${INPUT_VALUE}" \
     --action "${ACTION}" \
     --token "${TOKEN}" \
     --repository "${GITHUB_REPOSITORY}" \
