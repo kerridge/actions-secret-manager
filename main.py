@@ -125,10 +125,10 @@ def create_secret(request: RequestData):
             sys.exit(1)
 
     repository_public_key = get_secret_encryption_public_key(request)
-    if request.secret.value == '' and request.secret.file != '':
+    if request.secret.value == None and request.secret.file != None:
         # Read secret value from file
         encrypted_secret = encrypt_secret_value(repository_public_key.key, read_file_contents(request))
-    elif request.secret.file == '' and request.secret.value != '':
+    elif request.secret.file == None and request.secret.value != None:
         # Read secret value from command line
         encrypted_secret = encrypt_secret_value(repository_public_key.key, request.secret.value)
     
