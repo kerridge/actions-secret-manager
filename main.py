@@ -216,6 +216,7 @@ def parse_args() -> RequestData:
                 request.secret.name = arg
             elif opt in ('--secret-value'):
                 request.secret.value = arg
+                print("ARG SMARG: ", arg)
             elif opt in ('--secret-file'):
                 request.secret.file = arg
             elif opt in ('--repository'):
