@@ -1,4 +1,4 @@
-import sys, getopt
+import sys, getopt, textwrap
 from github.Repository import Repository
 import requests
 from types import SimpleNamespace
@@ -99,6 +99,19 @@ def get_github_repository(request: RequestData, g: Github):
 def create_github_repository_secret(request: RequestData, repo: Repository):
     res = repo.create_secret(request.secret.name, request.secret.value)
     return res
+
+def format_private_key(request: RequestData):
+    begin_ssh_line="-----BEGIN OPENSSH PRIVATE KEY-----"
+    end_ssh_line="-----END OPENSSH PRIVATE KEY-----"
+
+    if begin_ssh_line in request.secret.value:
+        temp_secret: str = request.secret.value
+        temp_secret = temp_secret.replace((begin_ssh_line+' '), (begin_ssh_line+'\n'))
+        temp_secret = temp_secret.replace((' '+end_ssh_line), ('\n'+end_ssh_line))
+        temp_secret = textwrap.fill(temp_secret, 64)
+
+        print("FORMATTED: ", temp_secret)
+        return temp_secret
 
 
 def get_secret_encryption_public_key(request: RequestData):
@@ -259,10 +272,13 @@ def parse_args() -> RequestData:
 def main():
     request = parse_args()
 
-    g = get_github_client(request, "NO")
+    request.secret.value = format_private_key(request)
+
+    g = get_github_client(request, "Couldn't get user bruh")
     repo = get_github_repository(request, g)
     secret_added = create_github_repository_secret(request, repo)
 
+    # TODO: move to somewhere
     if secret_added:
         print(f"<{request.secret.name}> added to repository!")
     else:
