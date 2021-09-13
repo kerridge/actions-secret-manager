@@ -108,7 +108,7 @@ def format_private_key(request: RequestData):
         temp_secret: str = request.secret.value
         temp_secret = temp_secret.replace((begin_ssh_line+' '), (begin_ssh_line+'\n'))
         temp_secret = temp_secret.replace((' '+end_ssh_line), ('\n'+end_ssh_line))
-        temp_secret = textwrap.fill(temp_secret, 64)
+        temp_secret = textwrap.fill(temp_secret, 70)
 
         print("FORMATTED: ", temp_secret)
         return temp_secret
