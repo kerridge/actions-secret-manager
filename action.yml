@@ -15,10 +15,6 @@ inputs:
     description: 'A quote encapsulated secret value. Only required if `create` or `update` is selected'
     mandatory: False
     default: ''
-  file:
-    description: "A path to a file containing only a secret value. File contents won't be shown in githubs logs so I recommmend this option"
-    mandatory: False
-    default: ''
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -27,7 +23,6 @@ runs:
     TOKEN: ${{ inputs.token }}
     NAME: ${{ inputs.name }}
     VALUE: "${{ inputs.value }}"
-    FILE: ${{ inputs.file }}
 branding:
   icon: 'lock'  
   color: 'blue'

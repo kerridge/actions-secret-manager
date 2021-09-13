@@ -125,12 +125,16 @@ def create_secret(request: RequestData):
             sys.exit(1)
 
     repository_public_key = get_secret_encryption_public_key(request)
-    if request.secret.value == None and request.secret.file != None:
-        # Read secret value from file
-        encrypted_secret = encrypt_secret_value(repository_public_key.key, read_file_contents(request))
-    elif request.secret.file == None and request.secret.value != None:
+    # if request.secret.value == None and request.secret.file != None:
+    #     # Read secret value from file
+    #     encrypted_secret = encrypt_secret_value(repository_public_key.key, read_file_contents(request))
+    if request.secret.file == None and request.secret.value != None:
         # Read secret value from command line
+        print("============================")
+        print("VALUE: ", request.secret.value)
+        print("============================")
         encrypted_secret = encrypt_secret_value(repository_public_key.key, request.secret.value)
+        print("SECRET: ", encrypted_secret)
     
     query_url = f"{github_base_url}/repos/{request.github_username}/{request.repository}/actions/secrets/{request.secret.name}"
     headers = {
@@ -216,7 +220,6 @@ def parse_args() -> RequestData:
                 request.secret.name = arg
             elif opt in ('--secret-value'):
                 request.secret.value = arg
-                print("ARG SMARG: ", arg)
             elif opt in ('--secret-file'):
                 request.secret.file = arg
             elif opt in ('--repository'):
