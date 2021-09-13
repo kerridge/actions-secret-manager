@@ -1,10 +1,14 @@
 import sys, getopt
+from github.Repository import Repository
 import requests
 from types import SimpleNamespace
 import json
 from base64 import b64encode
 from nacl import encoding, public
 from typing import Final
+
+from github import Github, BadCredentialsException
+from github.GithubException import UnknownObjectException
 
 # ACTION: Create/Update/Delete [STRING]
 # TOKEN: GITHUB ACCESS TOKEN [STRING]
@@ -76,6 +80,25 @@ def get_user_details(request: RequestData):
         namespaced_res = SimpleNamespace(**res.json())
         request.github_username = namespaced_res.login
         print("Logged in as: " + request.github_username)
+
+
+def get_github_client(request: RequestData, message) -> Github:
+    try:
+        g = Github(request.token)
+        print(f"Logged in as {g.get_user().login}")
+        return g
+    except BadCredentialsException:
+        raise ValueError(message)
+
+
+def get_github_repository(request: RequestData, g: Github):
+    repo = g.get_repo(request.repository)
+    return repo
+
+
+def create_github_repository_secret(request: RequestData, repo: Repository):
+    res = repo.create_secret(request.secret.name, request.secret.value)
+    return res
 
 
 def get_secret_encryption_public_key(request: RequestData):
@@ -221,7 +244,8 @@ def parse_args() -> RequestData:
                 request.secret.file = arg
             elif opt in ('--repository'):
                 # Automatically added to env by github. Follows {user}/{reposiitory}
-                request.repository = arg.split('/')[1]
+                request.repository = arg
+                # request.repository = arg.split('/')[1]
 
         validate_request(request)
         return request
@@ -235,9 +259,19 @@ def parse_args() -> RequestData:
 def main():
     request = parse_args()
 
-    get_user_details(request)
-    # TODO: Get existing secrets?
-    make_request_for_action(request)
+    g = get_github_client(request, "NO")
+    repo = get_github_repository(request, g)
+    secret_added = create_github_repository_secret(request, repo)
+
+    if secret_added:
+        print(f"<{request.secret.name}> added to repository!")
+    else:
+        print(f"<{request.secret.name}> couldn't be added")
+        
+
+    # get_user_details(request)
+    # # TODO: Get existing secrets?
+    # make_request_for_action(request)
 
 
 if __name__ == "__main__":
