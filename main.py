@@ -112,7 +112,7 @@ def format_private_key(request: RequestData):
 
         print("FORMATTED: ", temp_secret)
         return temp_secret
-
+    return request.secret.value
 
 def get_secret_encryption_public_key(request: RequestData):
     """Fetch pulic key from Github for secret encryption."""
